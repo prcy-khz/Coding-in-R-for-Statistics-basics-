@@ -76,3 +76,49 @@ growth = data.frame(group = rep(c('A','B','C'), each = 10), ht = c(7,14,14,13,12
           wilcox.test(Marks~Group, data = Indep_test, exact = FALSE)
           #p-value = 0.3924 > 0.05, FAIL TO reject Ho, there is insufficient evidence that tthe medians of the two groups is different
           
+
+#Multiple Independent sample test
+  #ANOVA- is a parametric test -  that tests the difference in means for three or more independent variables
+          #test Ho: all means are equal,  H1: atleast one is different
+              #aov(), use dependent~independent, data=, 
+          
+  #Kruskal-Wallis test - Non parametric test, the difference between medians of three or more independent variables
+          #Test Ho: all medians are equal, H1: atleast one is different
+            #kruskal.test(), 
+  
+  #These tests compare if there are two differences and not the whole set of variables, so we need a post-hoc test
+          #For ANOVA we use TukeyHSD()
+          #For Kruskal we use Bonferroni - pairwise.wilcox.test()
+          
+#Example          
+    #Creata a summary of the data for the 3 growth fertilizers 
+          boxplot(ht~group, data = growth, main = "Height vs Group", ylab = "height")
+    
+    #Check for normallity
+          Normality = round(cbind(shapiro.test(growth$ht[growth$group == "A"])$p.value,
+                                  shapiro.test(growth$ht[growth$group == "B"])$p.value,
+                                  shapiro.test(growth$ht[growth$group == "C"])$p.value), 3)
+          rownames(Normality) = "Shapiro Wilk P-Vlaue"
+          colnames(Normality) = c("A", "B", "C")
+          Normality
+            #All p-values > 0.05 - all groups are possibly normally distributed 
+          
+          
+    #Check for the quality of  the variences
+         bartlett.test(ht~group, data = growth)
+         #p.value = 0.9512 > 0.05 - fail to reject Ho, there is insufficient evidence that the 
+         fligner.test(ht~group, data = growth)
+         #p-value =0.838 > 0.05 - both bigger than 0.05 therefore the varience are equal
+         
+    #Performing the actual Parametric Test
+         anova = aov(ht~group, data = growth)
+          summary(anova)         
+          TukeyHSD(anova)          
+          #Reject the ANOVA null hypothesis
+          
+    #Performing the Non Parametric
+          kwd = kruskal.test(ht~group, data = growth)
+          kwd$p.value
+          pairwise.wilcox.test(growth$ht, growth$group, p.adjust.method = "bonferroni")
+          #Rejectthe null hypotehsis at 5% sig level
+          
